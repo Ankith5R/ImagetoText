@@ -3,7 +3,7 @@ no internet required after setup.
 
 What it does: 
 Upload any image and the app will:
-1. Identify the main subject (e.g. "a shoe", "a purple flower", "a dog")
+1. Identify the main subject (e.g. a shoe, a purple flower, a cat)
 2. Describe colours, lighting, composition, and detail level
 3. Show the image preview on the left and the description on the right
 
