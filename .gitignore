@@ -1,0 +1,16 @@
+# Virtual environment
+venv/
+
+# PyCharm
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Mac
+.DS_Store
+
+# Model cache (huge files, no need to push)
+~/.cache/huggingface/
