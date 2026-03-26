@@ -6,14 +6,14 @@ import numpy as np
 from PIL import Image, ImageTk, ImageOps
 import os
 
-BG       = "#ececec"   # light gray background
-PANEL    = "#f5f5f5"   # slightly lighter panel
-BORDER   = "#b0b0b0"   # medium gray border
-ACCENT   = "#000000"   # macOS-style blue button
-ACCENT2  = "#000000"   # lighter blue
-TEXT     = "#000000"   # near-black text
-TEXT_DIM = "#000000"   # muted gray
-ERROR    = "#e03131"   # red for errors
+BG       = "#ececec"
+PANEL    = "#f5f5f5"
+BORDER   = "#b0b0b0"
+ACCENT   = "#000000"   #button below
+ACCENT2  = "#000000"
+TEXT     = "#000000"
+TEXT_DIM = "#000000"
+ERROR    = "#e03131"
 
 MODEL_ID = "Salesforce/blip-image-captioning-large"
 
@@ -37,7 +37,7 @@ def describe_image(image_path, processor, model, device):
     pil_img = Image.open(image_path).convert("RGB")
     pil_img = ImageOps.exif_transpose(pil_img)
 
-    # 1. BLIP caption
+    #BLIP
     inputs = processor(pil_img, return_tensors="pt").to(device)
     with torch.no_grad():
         out = model.generate(**inputs, max_new_tokens=80, num_beams=5, early_stopping=True)
@@ -45,11 +45,11 @@ def describe_image(image_path, processor, model, device):
     if caption:
         caption = caption[0].upper() + caption[1:]
 
-    # 2. OpenCV analysis
+    #OpenCV
     cv_img = cv2.imread(image_path)
     h, w = cv_img.shape[:2]
 
-    # Dominant colour via k-means
+    #k-means for color dominance
     pixels = cv_img.reshape(-1, 3).astype(np.float32)
     _, labels, centers = cv2.kmeans(
         pixels, 3, None,
@@ -59,17 +59,17 @@ def describe_image(image_path, processor, model, device):
     dominant = centers[np.argmax(np.bincount(labels.flatten()))].astype(int)
     dom_name = bgr_to_name(dominant[0], dominant[1], dominant[2])
 
-    # Brightness
+    #brightness
     gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
     brightness = int(np.mean(gray))
     light_desc = "dark" if brightness < 64 else "moderately lit" if brightness < 140 else "bright"
 
-    # Edge complexity
+    #Edges for determining complexity
     edges = cv2.Canny(gray, 50, 150)
     edge_ratio = np.count_nonzero(edges) / edges.size
     complexity = "simple" if edge_ratio < 0.05 else "detailed" if edge_ratio < 0.15 else "complex"
 
-    # Orientation
+    #orientation
     aspect = "landscape" if w > h * 1.1 else "portrait" if h > w * 1.1 else "square"
 
     return (
